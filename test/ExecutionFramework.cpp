@@ -87,18 +87,18 @@ std::pair<bool, string> ExecutionFramework::compareAndCreateMessage(
 
 u256 ExecutionFramework::gasLimit() const
 {
-	auto latestBlock = m_rpc.eth_getBlockByNumber("latest", false);
+	auto latestBlock = m_rpc.ngin_getBlockByNumber("latest", false);
 	return u256(latestBlock["gasLimit"].asString());
 }
 
 u256 ExecutionFramework::gasPrice() const
 {
-	return u256(m_rpc.eth_gasPrice());
+	return u256(m_rpc.ngin_gasPrice());
 }
 
 u256 ExecutionFramework::blockHash(u256 const& _blockNumber) const
 {
-	return u256(m_rpc.eth_getBlockByNumber(toHex(_blockNumber, HexPrefix::Add), false)["hash"].asString());
+	return u256(m_rpc.ngin_getBlockByNumber(toHex(_blockNumber, HexPrefix::Add), false)["hash"].asString());
 }
 
 void ExecutionFramework::sendMessage(bytes const& _data, bool _isCreation, u256 const& _value)
@@ -122,14 +122,14 @@ void ExecutionFramework::sendMessage(bytes const& _data, bool _isCreation, u256 
 	if (!_isCreation)
 	{
 		d.to = dev::toString(m_contractAddress);
-		BOOST_REQUIRE(m_rpc.eth_getCode(d.to, "pending").size() > 2);
-		// Use eth_call to get the output
-		m_output = fromHex(m_rpc.eth_call(d, "pending"), WhenError::Throw);
+		BOOST_REQUIRE(m_rpc.ngin_getCode(d.to, "pending").size() > 2);
+		// Use ngin_call to get the output
+		m_output = fromHex(m_rpc.ngin_call(d, "pending"), WhenError::Throw);
 	}
 
-	string txHash = m_rpc.eth_sendTransaction(d);
+	string txHash = m_rpc.ngin_sendTransaction(d);
 	m_rpc.test_mineBlocks(1);
-	RPCSession::TransactionReceipt receipt(m_rpc.eth_getTransactionReceipt(txHash));
+	RPCSession::TransactionReceipt receipt(m_rpc.ngin_getTransactionReceipt(txHash));
 
 	m_blockNumber = u256(receipt.blockNumber);
 
@@ -137,7 +137,7 @@ void ExecutionFramework::sendMessage(bytes const& _data, bool _isCreation, u256 
 	{
 		m_contractAddress = Address(receipt.contractAddress);
 		BOOST_REQUIRE(m_contractAddress);
-		string code = m_rpc.eth_getCode(receipt.contractAddress, "latest");
+		string code = m_rpc.ngin_getCode(receipt.contractAddress, "latest");
 		m_output = fromHex(code, WhenError::Throw);
 	}
 
@@ -175,19 +175,19 @@ void ExecutionFramework::sendEther(Address const& _to, u256 const& _value)
 	d.value = toHex(_value, HexPrefix::Add);
 	d.to = dev::toString(_to);
 
-	string txHash = m_rpc.eth_sendTransaction(d);
+	string txHash = m_rpc.ngin_sendTransaction(d);
 	m_rpc.test_mineBlocks(1);
 }
 
 size_t ExecutionFramework::currentTimestamp()
 {
-	auto latestBlock = m_rpc.eth_getBlockByNumber("latest", false);
+	auto latestBlock = m_rpc.ngin_getBlockByNumber("latest", false);
 	return size_t(u256(latestBlock.get("timestamp", "invalid").asString()));
 }
 
 size_t ExecutionFramework::blockTimestamp(u256 _number)
 {
-	auto latestBlock = m_rpc.eth_getBlockByNumber(toString(_number), false);
+	auto latestBlock = m_rpc.ngin_getBlockByNumber(toString(_number), false);
 	return size_t(u256(latestBlock.get("timestamp", "invalid").asString()));
 }
 
@@ -198,18 +198,18 @@ Address ExecutionFramework::account(size_t _i)
 
 bool ExecutionFramework::addressHasCode(Address const& _addr)
 {
-	string code = m_rpc.eth_getCode(toString(_addr), "latest");
+	string code = m_rpc.ngin_getCode(toString(_addr), "latest");
 	return !code.empty() && code != "0x";
 }
 
 u256 ExecutionFramework::balanceAt(Address const& _addr)
 {
-	return u256(m_rpc.eth_getBalance(toString(_addr), "latest"));
+	return u256(m_rpc.ngin_getBalance(toString(_addr), "latest"));
 }
 
 bool ExecutionFramework::storageEmpty(Address const& _addr)
 {
-	h256 root(m_rpc.eth_getStorageRoot(toString(_addr), "latest"));
+	h256 root(m_rpc.ngin_getStorageRoot(toString(_addr), "latest"));
 	BOOST_CHECK(root);
 	return root == EmptyTrie;
 }

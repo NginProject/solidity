@@ -144,21 +144,21 @@ RPCSession& RPCSession::instance(const string& _path)
 	return session;
 }
 
-string RPCSession::eth_getCode(string const& _address, string const& _blockNumber)
+string RPCSession::ngin_getCode(string const& _address, string const& _blockNumber)
 {
-	return rpcCall("eth_getCode", { quote(_address), quote(_blockNumber) }).asString();
+	return rpcCall("ngin_getCode", { quote(_address), quote(_blockNumber) }).asString();
 }
 
-Json::Value RPCSession::eth_getBlockByNumber(string const& _blockNumber, bool _fullObjects)
+Json::Value RPCSession::ngin_getBlockByNumber(string const& _blockNumber, bool _fullObjects)
 {
 	// NOTE: to_string() converts bool to 0 or 1
-	return rpcCall("eth_getBlockByNumber", { quote(_blockNumber), _fullObjects ? "true" : "false" });
+	return rpcCall("ngin_getBlockByNumber", { quote(_blockNumber), _fullObjects ? "true" : "false" });
 }
 
-RPCSession::TransactionReceipt RPCSession::eth_getTransactionReceipt(string const& _transactionHash)
+RPCSession::TransactionReceipt RPCSession::ngin_getTransactionReceipt(string const& _transactionHash)
 {
 	TransactionReceipt receipt;
-	Json::Value const result = rpcCall("eth_getTransactionReceipt", { quote(_transactionHash) });
+	Json::Value const result = rpcCall("ngin_getTransactionReceipt", { quote(_transactionHash) });
 	BOOST_REQUIRE(!result.isNull());
 	receipt.gasUsed = result["gasUsed"].asString();
 	receipt.contractAddress = result["contractAddress"].asString();
@@ -180,36 +180,36 @@ RPCSession::TransactionReceipt RPCSession::eth_getTransactionReceipt(string cons
 	return receipt;
 }
 
-string RPCSession::eth_sendTransaction(TransactionData const& _td)
+string RPCSession::ngin_sendTransaction(TransactionData const& _td)
 {
-	return rpcCall("eth_sendTransaction", { _td.toJson() }).asString();
+	return rpcCall("ngin_sendTransaction", { _td.toJson() }).asString();
 }
 
-string RPCSession::eth_call(TransactionData const& _td, string const& _blockNumber)
+string RPCSession::ngin_call(TransactionData const& _td, string const& _blockNumber)
 {
-	return rpcCall("eth_call", { _td.toJson(), quote(_blockNumber) }).asString();
+	return rpcCall("ngin_call", { _td.toJson(), quote(_blockNumber) }).asString();
 }
 
-string RPCSession::eth_sendTransaction(string const& _transaction)
+string RPCSession::ngin_sendTransaction(string const& _transaction)
 {
-	return rpcCall("eth_sendTransaction", { _transaction }).asString();
+	return rpcCall("ngin_sendTransaction", { _transaction }).asString();
 }
 
-string RPCSession::eth_getBalance(string const& _address, string const& _blockNumber)
+string RPCSession::ngin_getBalance(string const& _address, string const& _blockNumber)
 {
 	string address = (_address.length() == 20) ? "0x" + _address : _address;
-	return rpcCall("eth_getBalance", { quote(address), quote(_blockNumber) }).asString();
+	return rpcCall("ngin_getBalance", { quote(address), quote(_blockNumber) }).asString();
 }
 
-string RPCSession::eth_getStorageRoot(string const& _address, string const& _blockNumber)
+string RPCSession::ngin_getStorageRoot(string const& _address, string const& _blockNumber)
 {
 	string address = (_address.length() == 20) ? "0x" + _address : _address;
-	return rpcCall("eth_getStorageRoot", { quote(address), quote(_blockNumber) }).asString();
+	return rpcCall("ngin_getStorageRoot", { quote(address), quote(_blockNumber) }).asString();
 }
 
-string RPCSession::eth_gasPrice()
+string RPCSession::ngin_gasPrice()
 {
-	return rpcCall("eth_gasPrice").asString();
+	return rpcCall("ngin_gasPrice").asString();
 }
 
 void RPCSession::personal_unlockAccount(string const& _address, string const& _password, int _duration)
@@ -294,7 +294,7 @@ void RPCSession::test_rewindToBlock(size_t _blockNr)
 
 void RPCSession::test_mineBlocks(int _number)
 {
-	u256 startBlock = fromBigEndian<u256>(fromHex(rpcCall("eth_blockNumber").asString()));
+	u256 startBlock = fromBigEndian<u256>(fromHex(rpcCall("ngin_blockNumber").asString()));
 	BOOST_REQUIRE(rpcCall("test_mineBlocks", { to_string(_number) }, true) == true);
 
 	// We auto-calibrate the time it takes to mine the transaction.
@@ -310,7 +310,7 @@ void RPCSession::test_mineBlocks(int _number)
 		unsigned timeSpent = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
 		if (timeSpent > m_maxMiningTime)
 			BOOST_FAIL("Error in test_mineBlocks: block mining timeout!");
-		if (fromBigEndian<u256>(fromHex(rpcCall("eth_blockNumber").asString())) >= startBlock + _number)
+		if (fromBigEndian<u256>(fromHex(rpcCall("ngin_blockNumber").asString())) >= startBlock + _number)
 			break;
 		else
 			sleepTime *= 2;
